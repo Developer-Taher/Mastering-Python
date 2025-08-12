@@ -13,4 +13,4 @@ then escape sequance char
 
 then concatenation 
 
-now i am working on string file i will uplad it tommorow
+then strings is containe full guide for strings 
