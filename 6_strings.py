@@ -1337,29 +1337,46 @@ for table, column, search in sql_tests:
 
 # Password hashing (conceptual)
 import hashlib
+import secrets
 
-def hash_password(password, salt=None):
-    """Simple password hashing example"""
-    if salt is None:
-        salt = "default_salt_should_be_random"
-    
-    # Combine password and salt
-    salted_password = password + salt
-    
-    # Hash using SHA-256
-    hashed = hashlib.sha256(salted_password.encode()).hexdigest()
-    
-    return hashed, salt
+def hash_password(password: str, *, iterations: int = 100_000, salt_hex: str | None = None):
+    """Securely hash a password using PBKDF2-HMAC (SHA-256).
 
-print("🔐 Password Hashing Example:")
+    Returns (hash_hex, salt_hex, iterations)
+    """
+    if salt_hex is None:
+        salt_bytes = secrets.token_bytes(16)
+        salt_hex = salt_bytes.hex()
+    else:
+        salt_bytes = bytes.fromhex(salt_hex)
+
+    dk = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt_bytes, iterations)
+    return dk.hex(), salt_hex, iterations
+
+
+def verify_password(password: str, hash_hex: str, salt_hex: str, iterations: int) -> bool:
+    """Verify a password against an existing PBKDF2 hash."""
+    recomputed_hex, _, _ = hash_password(password, iterations=iterations, salt_hex=salt_hex)
+    # secrets.compare_digest avoids timing attacks
+    return secrets.compare_digest(recomputed_hex, hash_hex)
+
+
+print("🔐 Password Hashing Example (PBKDF2):")
 test_passwords = ["password123", "MySecurePass!", "123456"]
 
+records = []
 for pwd in test_passwords:
-    hashed, salt = hash_password(pwd)
+    hash_hex, salt_hex, iters = hash_password(pwd)
+    records.append((pwd, hash_hex, salt_hex, iters))
     print(f"  Password: '{pwd}'")
-    print(f"  Hashed: '{hashed[:20]}...'")
-    print(f"  Salt: '{salt}'")
+    print(f"  Hash: '{hash_hex[:20]}...'")
+    print(f"  Salt(hex): '{salt_hex}'")
     print()
+
+print("✅ Verification:")
+for pwd, hash_hex, salt_hex, iters in records:
+    ok = verify_password(pwd, hash_hex, salt_hex, iters)
+    print(f"  '{pwd}' → {ok}")
 
 print("\n" + "=" * 50)
 print("1️⃣6️⃣ String Best Practices")
