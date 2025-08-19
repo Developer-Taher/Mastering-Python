@@ -194,6 +194,170 @@ print(f"  17 // -5 = {17 // -5}")
 print(f"  -17 % 5  = {-17 % 5}")
 
 print("\n" + "=" * 50)
+print("4️⃣B Bitwise Operations")
+print("=" * 50)
+
+print("\n🔢 Bitwise Operations on Integers")
+print("-" * 32)
+
+# Basic bitwise operations
+a, b = 12, 10  # 12 = 1100, 10 = 1010 in binary
+print(f"Given: a = {a} (binary: {bin(a)}), b = {b} (binary: {bin(b)})")
+print(f"")
+
+bitwise_operations = [
+    ("AND", a & b, f"{a} & {b}", "Both bits must be 1"),
+    ("OR", a | b, f"{a} | {b}", "At least one bit must be 1"),
+    ("XOR", a ^ b, f"{a} ^ {b}", "Bits must be different"),
+    ("NOT a", ~a, f"~{a}", "Flip all bits"),
+    ("NOT b", ~b, f"~{b}", "Flip all bits"),
+    ("Left Shift", a << 2, f"{a} << 2", "Shift bits left by 2"),
+    ("Right Shift", a >> 2, f"{a} >> 2", "Shift bits right by 2"),
+]
+
+for name, result, expression, description in bitwise_operations:
+    binary_result = bin(result) if result >= 0 else bin(result & 0xFFFFFFFF)
+    print(f"  {name:12}: {expression:8} = {result:3d} ({binary_result}) - {description}")
+
+# Practical bitwise examples
+print(f"\n🎯 Practical Bitwise Examples:")
+
+# Check if number is even/odd
+def is_even_bitwise(n):
+    return (n & 1) == 0
+
+def is_odd_bitwise(n):
+    return (n & 1) == 1
+
+print(f"Check Even/Odd using bitwise:")
+test_numbers = [5, 8, 13, 20]
+for num in test_numbers:
+    even = is_even_bitwise(num)
+    odd = is_odd_bitwise(num)
+    print(f"  {num}: Even={even}, Odd={odd}")
+
+# Multiply/Divide by powers of 2
+print(f"\nMultiply/Divide by powers of 2:")
+base_num = 15
+print(f"Base number: {base_num}")
+print(f"  {base_num} * 2   = {base_num << 1}  (left shift by 1)")
+print(f"  {base_num} * 4   = {base_num << 2}  (left shift by 2)")
+print(f"  {base_num} * 8   = {base_num << 3}  (left shift by 3)")
+print(f"  {base_num} ÷ 2   = {base_num >> 1}  (right shift by 1)")
+print(f"  {base_num} ÷ 4   = {base_num >> 2}  (right shift by 2)")
+
+# Bit manipulation tricks
+print(f"\n🎪 Bit Manipulation Tricks:")
+
+# Set bit
+def set_bit(num, pos):
+    return num | (1 << pos)
+
+# Clear bit
+def clear_bit(num, pos):
+    return num & ~(1 << pos)
+
+# Toggle bit
+def toggle_bit(num, pos):
+    return num ^ (1 << pos)
+
+# Check bit
+def check_bit(num, pos):
+    return (num & (1 << pos)) != 0
+
+test_num = 13  # Binary: 1101
+print(f"Original number: {test_num} (binary: {bin(test_num)})")
+print(f"  Set bit 1:    {set_bit(test_num, 1)} (binary: {bin(set_bit(test_num, 1))})")
+print(f"  Clear bit 2:  {clear_bit(test_num, 2)} (binary: {bin(clear_bit(test_num, 2))})")
+print(f"  Toggle bit 0: {toggle_bit(test_num, 0)} (binary: {bin(toggle_bit(test_num, 0))})")
+print(f"  Check bit 3:  {check_bit(test_num, 3)}")
+print(f"  Check bit 1:  {check_bit(test_num, 1)}")
+
+# Count set bits
+def count_set_bits(n):
+    count = 0
+    while n:
+        count += n & 1
+        n >>= 1
+    return count
+
+print(f"\nCount set bits:")
+bit_test_numbers = [7, 15, 31, 255]
+for num in bit_test_numbers:
+    bits = count_set_bits(num)
+    print(f"  {num:3d} (binary: {bin(num):>10}) has {bits} set bits")
+
+print("\n" + "=" * 50)
+print("4️⃣C Augmented Assignment Operations")
+print("=" * 50)
+
+print("\n🔄 Augmented Assignment Operators")
+print("-" * 32)
+
+# Arithmetic augmented assignments
+print("➕ Arithmetic Augmented Assignments:")
+x = 10
+print(f"Starting value: x = {x}")
+
+operations = [
+    ("x += 5", "x = x + 5"),
+    ("x -= 3", "x = x - 3"),
+    ("x *= 2", "x = x * 2"),
+    ("x /= 4", "x = x / 4"),
+    ("x //= 2", "x = x // 2"),
+    ("x %= 3", "x = x % 3"),
+    ("x **= 2", "x = x ** 2"),
+]
+
+x = 10  # Reset
+for augmented, equivalent in operations:
+    old_x = x
+    exec(augmented)
+    print(f"  {augmented:8} (equivalent: {equivalent:12}) → {old_x} becomes {x}")
+
+# Bitwise augmented assignments
+print(f"\n🔢 Bitwise Augmented Assignments:")
+y = 12  # Binary: 1100
+print(f"Starting value: y = {y} (binary: {bin(y)})")
+
+bitwise_ops = [
+    ("y &= 10", "y = y & 10"),
+    ("y |= 5", "y = y | 5"),
+    ("y ^= 3", "y = y ^ 3"),
+    ("y <<= 1", "y = y << 1"),
+    ("y >>= 2", "y = y >> 2"),
+]
+
+y = 12  # Reset
+for augmented, equivalent in bitwise_ops:
+    old_y = y
+    exec(augmented)
+    print(f"  {augmented:8} (equivalent: {equivalent:12}) → {old_y} ({bin(old_y)}) becomes {y} ({bin(y)})")
+
+# String augmented assignment
+print(f"\n📝 String Augmented Assignment:")
+text = "Hello"
+print(f"Starting: text = '{text}'")
+text += " World"
+print(f"text += ' World' → '{text}'")
+text *= 2
+print(f"text *= 2 → '{text}'")
+
+# List augmented assignment
+print(f"\n📋 List Augmented Assignment:")
+numbers = [1, 2, 3]
+print(f"Starting: numbers = {numbers}")
+numbers += [4, 5]
+print(f"numbers += [4, 5] → {numbers}")
+numbers *= 2
+print(f"numbers *= 2 → {numbers}")
+
+# Performance consideration
+print(f"\n⚡ Performance Note:")
+print("Augmented assignments can be more efficient than regular assignments")
+print("because they can modify the object in-place when possible.")
+
+print("\n" + "=" * 50)
 print("5️⃣ Number Conversion and Casting")
 print("=" * 50)
 
