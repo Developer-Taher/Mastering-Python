@@ -15,7 +15,15 @@ Examples: "Hello", 'Python', "123", "user@email.com", "Welcome to programming!"
 import string
 import re
 import sys
+import io
+import locale
+import unicodedata
+import textwrap
+import difflib
+import json
+import csv
 from datetime import datetime
+from string import Template
 
 print("=" * 70)
 print("🐍 Complete Guide to Python Strings")
@@ -134,6 +142,18 @@ print("Line 1\nLine 2\nLine 3")  # New lines
 print("Column1\tColumn2\tColumn3")  # Tabs
 print("Path: C:\\Users\\Python\\file.txt")  # Backslashes
 print('She said: "I\'m learning Python"')  # Mixed quotes
+
+# Unicode details
+print(f"\n🔍 Unicode Deep Dive:")
+sample_text = "Python🐍"
+print(f"Text: {sample_text}")
+print(f"Length: {len(sample_text)} characters")
+print(f"Encoded (UTF-8): {sample_text.encode('utf-8')}")
+print(f"Bytes length: {len(sample_text.encode('utf-8'))} bytes")
+
+# Character analysis
+for i, char in enumerate(sample_text):
+    print(f"  [{i}] '{char}' → Unicode: U+{ord(char):04X}, Category: {unicodedata.category(char)}")
 
 print("\n" + "=" * 50)
 print("4️⃣ String Indexing and Slicing")
@@ -283,7 +303,7 @@ for num in numbers:
     print(f"'{num}'.zfill(6): '{num.zfill(6)}'")
 
 print("\n" + "=" * 50)
-print("7️⃣ String Formatting - Old vs New")
+print("7️⃣ String Formatting - Complete Guide")
 print("=" * 50)
 
 print("\n🎨 String Formatting Methods")
@@ -342,6 +362,21 @@ print(f"  Expressions: f'Active: {{data[\"active\"]/data[\"users\"]*100:.1f}}%' 
 current_time = datetime.now()
 print(f"  Date formatting: f'Today: {{current_time:%Y-%m-%d %H:%M}}' → 'Today: {current_time:%Y-%m-%d %H:%M}'")
 
+# String Template class
+print(f"\n🎯 String Template Class:")
+template = Template("Hello $name, you are $age years old and earn $salary")
+result = template.substitute(name=name, age=age, salary=salary)
+print(f"  Template: {template.template}")
+print(f"  Result: {result}")
+
+# Safe substitution
+template_safe = Template("$name works at $company")
+try:
+    result_safe = template_safe.safe_substitute(name=name)
+    print(f"  Safe substitute (missing $company): {result_safe}")
+except KeyError as e:
+    print(f"  Error: {e}")
+
 print("\n" + "=" * 50)
 print("8️⃣ String Concatenation Methods")
 print("=" * 50)
@@ -371,6 +406,19 @@ print(f"Format method: '{{}} {{}}'.format('{first_name}', '{last_name}') → '{f
 # f-string
 f_string_result = f"{first_name} {last_name}"
 print(f"f-string: f'{{first_name}} {{last_name}}' → '{f_string_result}'")
+
+# StringIO for building large strings
+print(f"\n📝 StringIO for Large String Building:")
+import io
+buffer = io.StringIO()
+words = ["Python", "is", "really", "awesome", "for", "text", "processing"]
+for word in words:
+    buffer.write(word)
+    buffer.write(" ")
+
+large_string = buffer.getvalue().strip()
+buffer.close()
+print(f"StringIO result: '{large_string}'")
 
 # Performance comparison
 import timeit
@@ -499,6 +547,19 @@ for messy_text in messy_texts:
     cleaned = clean_text(messy_text)
     print(f"  '{messy_text}' → '{cleaned}'")
 
+# Advanced text normalization
+print(f"\n🌐 Unicode Normalization:")
+text_variants = [
+    "café",  # é as single character
+    "cafe\u0301",  # e + combining acute accent
+]
+
+for text in text_variants:
+    print(f"  Original: '{text}' (length: {len(text)})")
+    print(f"  NFC: '{unicodedata.normalize('NFC', text)}' (length: {len(unicodedata.normalize('NFC', text))})")
+    print(f"  NFD: '{unicodedata.normalize('NFD', text)}' (length: {len(unicodedata.normalize('NFD', text))})")
+    print()
+
 print("\n" + "=" * 50)
 print("🔟 Advanced String Operations")
 print("=" * 50)
@@ -512,14 +573,29 @@ original_text = "Hello, 世界! 🌍"
 print(f"Original: '{original_text}'")
 
 # Different encodings
-encodings = ['utf-8', 'ascii', 'latin-1']
+encodings = ['utf-8', 'ascii', 'latin-1', 'utf-16']
 for encoding in encodings:
     try:
         encoded = original_text.encode(encoding)
         decoded = encoded.decode(encoding)
-        print(f"  {encoding:8}: {encoded} → '{decoded}'")
+        print(f"  {encoding:8}: {len(encoded):3d} bytes → '{decoded}'")
     except UnicodeEncodeError as e:
-        print(f"  {encoding:8}: Error - {e}")
+        print(f"  {encoding:8}: Error - {str(e)[:50]}...")
+
+# Handling encoding errors
+print(f"\n⚠️ Handling Encoding Errors:")
+problematic_text = "Hello 🌍 World"
+try:
+    encoded_ascii = problematic_text.encode('ascii', errors='ignore')
+    print(f"Ignore errors: '{encoded_ascii.decode('ascii')}'")
+    
+    encoded_replace = problematic_text.encode('ascii', errors='replace')
+    print(f"Replace errors: '{encoded_replace.decode('ascii')}'")
+    
+    encoded_xmlcharrefreplace = problematic_text.encode('ascii', errors='xmlcharrefreplace')
+    print(f"XML char replace: '{encoded_xmlcharrefreplace.decode('ascii')}'")
+except Exception as e:
+    print(f"Error: {e}")
 
 # String translations
 print(f"\n🔄 String Translation:")
@@ -551,6 +627,24 @@ print(f"Phone numbers found: {phones}")
 email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
 emails = re.findall(email_pattern, text_with_numbers)
 print(f"Email addresses found: {emails}")
+
+# Advanced regex operations
+print(f"\n⚡ Advanced Regex Operations:")
+sample_text = "The price is $19.99 and tax is $1.60"
+print(f"Text: '{sample_text}'")
+
+# Find all prices
+price_pattern = r'\$\d+\.\d{2}'
+prices = re.findall(price_pattern, sample_text)
+print(f"Prices found: {prices}")
+
+# Replace with function
+def double_price(match):
+    price = float(match.group()[1:])  # Remove $ and convert to float
+    return f"${price * 2:.2f}"
+
+doubled_text = re.sub(price_pattern, double_price, sample_text)
+print(f"Doubled prices: '{doubled_text}'")
 
 # String compression
 print(f"\n📦 String Compression Example:")
@@ -631,11 +725,21 @@ def test_string_concatenation_list(n=1000):
         chars.append("a")
     return "".join(chars)
 
+def test_string_concatenation_stringio(n=1000):
+    """Test StringIO concatenation"""
+    buffer = io.StringIO()
+    for i in range(n):
+        buffer.write("a")
+    result = buffer.getvalue()
+    buffer.close()
+    return result
+
 n = 1000
 methods = [
     ("Plus operator", lambda: test_string_concatenation_plus(n)),
     ("Join method", lambda: test_string_concatenation_join(n)),
-    ("List + join", lambda: test_string_concatenation_list(n))
+    ("List + join", lambda: test_string_concatenation_list(n)),
+    ("StringIO", lambda: test_string_concatenation_stringio(n))
 ]
 
 for method_name, method_func in methods:
@@ -661,6 +765,19 @@ print(f"id(a): {id(a)}")
 print(f"id(b): {id(b)}")
 print(f"id(c): {id(c)}")
 print(f"id(d): {id(d)}")
+
+# Manual string interning
+print(f"\n🔧 Manual String Interning:")
+import sys
+e = sys.intern("hello world")
+f = sys.intern("hello world")
+g = "hello world"
+
+print(f"e = sys.intern('hello world')")
+print(f"f = sys.intern('hello world')")
+print(f"g = 'hello world'")
+print(f"e is f: {e is f}")
+print(f"e is g: {e is g}")
 
 print("\n" + "=" * 50)
 print("1️⃣2️⃣ Practical String Applications")
@@ -859,6 +976,30 @@ for entry in log_entries:
         else:
             print(f"    {parsed['error']}")
 
+# JSON string handling
+print(f"\n📄 JSON String Processing:")
+json_data = {
+    "name": "Alice",
+    "age": 25,
+    "city": "New York",
+    "skills": ["Python", "JavaScript", "SQL"]
+}
+
+# Convert to JSON string
+json_string = json.dumps(json_data, indent=2)
+print(f"JSON String:\n{json_string}")
+
+# Parse JSON string
+parsed_data = json.loads(json_string)
+print(f"Parsed back: {parsed_data}")
+
+# Handle malformed JSON
+malformed_json = '{"name": "Alice", "age": 25,}'  # Trailing comma
+try:
+    parsed_malformed = json.loads(malformed_json)
+except json.JSONDecodeError as e:
+    print(f"JSON Error: {e}")
+
 print("\n" + "=" * 50)
 print("1️⃣3️⃣ String Algorithms and Patterns")
 print("=" * 50)
@@ -946,6 +1087,12 @@ for str1, str2 in similarity_tests:
     similarity = (1 - distance / max_len) * 100 if max_len > 0 else 100
     print(f"  '{str1}' & '{str2}' → Distance: {distance}, Similarity: {similarity:.1f}%")
 
+# String similarity using difflib
+print(f"\n🔍 String Similarity using difflib:")
+for str1, str2 in similarity_tests[:3]:
+    ratio = difflib.SequenceMatcher(None, str1, str2).ratio()
+    print(f"  '{str1}' & '{str2}' → Similarity: {ratio:.3f} ({ratio*100:.1f}%)")
+
 # Pattern matching
 def find_pattern_occurrences(text, pattern):
     """Find all occurrences of pattern in text"""
@@ -964,8 +1111,161 @@ for pattern in patterns:
     occurrences = find_pattern_occurrences(search_text.lower(), pattern)
     print(f"  Pattern '{pattern}': {len(occurrences)} occurrences at positions {occurrences}")
 
+# KMP Algorithm for pattern matching
+def kmp_search(text, pattern):
+    """Knuth-Morris-Pratt pattern matching algorithm"""
+    def compute_lps(pattern):
+        """Compute Longest Prefix Suffix array"""
+        lps = [0] * len(pattern)
+        length = 0
+        i = 1
+        
+        while i < len(pattern):
+            if pattern[i] == pattern[length]:
+                length += 1
+                lps[i] = length
+                i += 1
+            else:
+                if length != 0:
+                    length = lps[length - 1]
+                else:
+                    lps[i] = 0
+                    i += 1
+        return lps
+    
+    if not pattern:
+        return []
+    
+    lps = compute_lps(pattern)
+    occurrences = []
+    i = j = 0
+    
+    while i < len(text):
+        if pattern[j] == text[i]:
+            i += 1
+            j += 1
+        
+        if j == len(pattern):
+            occurrences.append(i - j)
+            j = lps[j - 1]
+        elif i < len(text) and pattern[j] != text[i]:
+            if j != 0:
+                j = lps[j - 1]
+            else:
+                i += 1
+    
+    return occurrences
+
+print(f"\n⚡ KMP Algorithm:")
+kmp_text = "ABABDABACDABABCABCABCABC"
+kmp_pattern = "ABABCAB"
+kmp_matches = kmp_search(kmp_text, kmp_pattern)
+print(f"Text: '{kmp_text}'")
+print(f"Pattern: '{kmp_pattern}'")
+print(f"Matches at positions: {kmp_matches}")
+
 print("\n" + "=" * 50)
-print("1️⃣4️⃣ String Security and Validation")
+print("1️⃣4️⃣ Advanced Text Processing")
+print("=" * 50)
+
+print("\n📚 Text Processing Libraries")
+print("-" * 28)
+
+# TextWrap module
+print("📦 TextWrap Module:")
+long_text = "Python is a high-level, interpreted programming language with dynamic semantics. Its high-level built-in data structures, combined with dynamic typing and dynamic binding, make it very attractive for Rapid Application Development."
+
+print(f"Original text: {long_text}")
+print(f"\nWrapped (width=40):")
+wrapped = textwrap.wrap(long_text, width=40)
+for line in wrapped:
+    print(f"  {line}")
+
+print(f"\nFilled (width=40):")
+filled = textwrap.fill(long_text, width=40)
+print(f"  {filled}")
+
+print(f"\nIndented:")
+indented = textwrap.indent(long_text, "    ")
+print(f"{indented}")
+
+# Text statistics
+def text_statistics(text):
+    """Calculate comprehensive text statistics"""
+    words = text.split()
+    sentences = text.count('.') + text.count('!') + text.count('?')
+    paragraphs = text.count('\n\n') + 1
+    
+    char_count = len(text)
+    char_count_no_spaces = len(''.join(text.split()))
+    
+    word_lengths = [len(word.strip('.,!?";')) for word in words]
+    avg_word_length = sum(word_lengths) / len(word_lengths) if word_lengths else 0
+    
+    return {
+        'characters': char_count,
+        'characters_no_spaces': char_count_no_spaces,
+        'words': len(words),
+        'sentences': sentences,
+        'paragraphs': paragraphs,
+        'avg_word_length': avg_word_length,
+        'reading_time_minutes': len(words) / 200  # Assuming 200 WPM
+    }
+
+print(f"\n📊 Text Statistics:")
+sample_text = """Python is a programming language that lets you work quickly and integrate systems more effectively. 
+Python can be easy to pick up whether you're a first time programmer or you're experienced with other languages."""
+
+stats = text_statistics(sample_text)
+print(f"Text: {sample_text[:50]}...")
+for key, value in stats.items():
+    if isinstance(value, float):
+        print(f"  {key.replace('_', ' ').title()}: {value:.2f}")
+    else:
+        print(f"  {key.replace('_', ' ').title()}: {value}")
+
+# Word frequency analysis
+def word_frequency_analysis(text):
+    """Analyze word frequency in text"""
+    import re
+    from collections import Counter
+    
+    # Clean text and extract words
+    words = re.findall(r'\b[a-zA-Z]+\b', text.lower())
+    
+    # Count frequencies
+    word_counts = Counter(words)
+    
+    return word_counts
+
+print(f"\n📈 Word Frequency Analysis:")
+freq_text = "Python is great. Python is powerful. Python is easy to learn. Programming in Python is fun."
+frequencies = word_frequency_analysis(freq_text)
+
+print(f"Text: {freq_text}")
+print(f"Word frequencies:")
+for word, count in frequencies.most_common(5):
+    print(f"  '{word}': {count}")
+
+# Text similarity comparison
+print(f"\n🔍 Text Similarity Comparison:")
+text1 = "Python is a great programming language"
+text2 = "Python is an excellent programming language" 
+text3 = "Java is a programming language"
+
+comparisons = [
+    (text1, text2),
+    (text1, text3),
+    (text2, text3)
+]
+
+for t1, t2 in comparisons:
+    similarity = difflib.SequenceMatcher(None, t1, t2).ratio()
+    print(f"  '{t1[:30]}...' vs '{t2[:30]}...'")
+    print(f"    Similarity: {similarity:.3f} ({similarity*100:.1f}%)")
+
+print("\n" + "=" * 50)
+print("1️⃣5️⃣ String Security and Validation")
 print("=" * 50)
 
 print("\n🔒 String Security Considerations")
@@ -975,7 +1275,7 @@ print("-" * 31)
 def sanitize_input(user_input):
     """Sanitize user input for basic security"""
     # Remove potential HTML/script tags
-    dangerous_patterns = ['<script', '</script>', '<iframe', '</iframe>', 'javascript:', 'on']
+    dangerous_patterns = ['<script', '</script>', '<iframe', '</iframe>', 'javascript:', 'onclick=']
     
     sanitized = user_input
     for pattern in dangerous_patterns:
@@ -1035,8 +1335,34 @@ for table, column, search in sql_tests:
     print(f"  Result: {result}")
     print()
 
+# Password hashing (conceptual)
+import hashlib
+
+def hash_password(password, salt=None):
+    """Simple password hashing example"""
+    if salt is None:
+        salt = "default_salt_should_be_random"
+    
+    # Combine password and salt
+    salted_password = password + salt
+    
+    # Hash using SHA-256
+    hashed = hashlib.sha256(salted_password.encode()).hexdigest()
+    
+    return hashed, salt
+
+print("🔐 Password Hashing Example:")
+test_passwords = ["password123", "MySecurePass!", "123456"]
+
+for pwd in test_passwords:
+    hashed, salt = hash_password(pwd)
+    print(f"  Password: '{pwd}'")
+    print(f"  Hashed: '{hashed[:20]}...'")
+    print(f"  Salt: '{salt}'")
+    print()
+
 print("\n" + "=" * 50)
-print("1️⃣5️⃣ String Best Practices")
+print("1️⃣6️⃣ String Best Practices")
 print("=" * 50)
 
 print("\n💡 String Best Practices Guide")
@@ -1049,6 +1375,7 @@ print("""
 ✅ Avoid += in loops for string building
 ✅ Use string methods instead of regular expressions when possible
 ✅ Cache frequently used string operations
+✅ Use StringIO for building very large strings
 
 🔒 Security Best Practices:
 ✅ Always validate and sanitize user input
@@ -1056,6 +1383,7 @@ print("""
 ✅ Escape special characters when needed
 ✅ Set reasonable length limits on inputs
 ✅ Be careful with eval() and exec() on strings
+✅ Use proper encoding/decoding
 
 📝 Code Quality Best Practices:
 ✅ Use meaningful variable names
@@ -1063,6 +1391,7 @@ print("""
 ✅ Document string format expectations
 ✅ Use type hints for string parameters
 ✅ Handle encoding/decoding explicitly
+✅ Use proper exception handling
 
 🌐 Internationalization Best Practices:
 ✅ Use Unicode (UTF-8) by default
@@ -1070,12 +1399,13 @@ print("""
 ✅ Test with non-ASCII characters
 ✅ Consider right-to-left languages
 ✅ Use locale-aware string comparisons when needed
+✅ Normalize Unicode when comparing strings
 """)
 
 # Example of good string practices
 print("\n📋 Example: Well-Structured String Class")
 
-class StringValidator:
+class StringProcessor:
     """Example of good string handling practices"""
     
     # Constants
@@ -1097,10 +1427,8 @@ class StringValidator:
         if len(cleaned) > self.MAX_LENGTH:
             raise ValueError(f"String too long (max {self.MAX_LENGTH} characters)")
         
-        # Check allowed characters
-        for char in cleaned:
-            if char not in self.ALLOWED_CHARS:
-                raise ValueError(f"Invalid character: '{char}'")
+        # Normalize Unicode
+        cleaned = unicodedata.normalize('NFC', cleaned)
         
         return cleaned
     
@@ -1108,7 +1436,7 @@ class StringValidator:
         return self.value
     
     def __repr__(self) -> str:
-        return f"StringValidator('{self.value}')"
+        return f"StringProcessor('{self.value}')"
     
     def is_email_like(self) -> bool:
         """Check if string looks like an email"""
@@ -1117,27 +1445,46 @@ class StringValidator:
     def capitalize_words(self) -> str:
         """Capitalize each word"""
         return " ".join(word.capitalize() for word in self.value.split())
+    
+    def get_word_count(self) -> int:
+        """Get word count"""
+        return len(self.value.split())
+    
+    def contains_only_ascii(self) -> bool:
+        """Check if string contains only ASCII characters"""
+        return self.value.isascii()
+    
+    def to_slug(self) -> str:
+        """Convert to URL-friendly slug"""
+        # Convert to lowercase and replace spaces with hyphens
+        slug = self.value.lower()
+        slug = re.sub(r'[^a-z0-9]+', '-', slug)
+        slug = slug.strip('-')
+        return slug
 
-print("Testing StringValidator:")
+print("Testing StringProcessor:")
 test_values = [
     "john.doe@example.com",
     "hello world",
     "Test String 123",
-    "invalid@char!",  # This will fail
+    "Café résumé naïve",
 ]
 
-for test_val in test_values[:3]:  # Skip the invalid one for demo
+for test_val in test_values:
     try:
-        sv = StringValidator(test_val)
-        print(f"  Value: {sv}")
-        print(f"  Email-like: {sv.is_email_like()}")
-        print(f"  Capitalized: {sv.capitalize_words()}")
+        sp = StringProcessor(test_val)
+        print(f"  Value: {sp}")
+        print(f"    Email-like: {sp.is_email_like()}")
+        print(f"    Capitalized: {sp.capitalize_words()}")
+        print(f"    Word count: {sp.get_word_count()}")
+        print(f"    ASCII only: {sp.contains_only_ascii()}")
+        print(f"    Slug: {sp.to_slug()}")
         print()
     except (ValueError, TypeError) as e:
         print(f"  Error with '{test_val}': {e}")
 
 print("\n" + "=" * 50)
-print("1️⃣6️⃣ String Testing and Debugging")
+print("1️⃣7️⃣ String Testing and Debugging")
 print("=" * 50)
 
 print("\n🧪 String Testing Strategies")
@@ -1198,12 +1545,20 @@ def debug_string(s, label="String"):
         "symbols": sum(1 for c in s if not c.isalnum() and not c.isspace())
     }
     print(f"  Character breakdown: {char_types}")
+    
+    # Unicode categories
+    if s:
+        categories = {}
+        for char in s:
+            cat = unicodedata.category(char)
+            categories[cat] = categories.get(cat, 0) + 1
+        print(f"  Unicode categories: {categories}")
 
-print("🔍 String Debugging Example:")
+print("🔍 String Debugging Examples:")
 debug_string("Hello, 世界! 123 🌍", "Mixed String")
 
 print("\n" + "=" * 50)
-print("1️⃣7️⃣ Practice Exercises")
+print("1️⃣8️⃣ Practice Exercises")
 print("=" * 50)
 
 print("\n🏋️ String Practice Challenges")
@@ -1288,8 +1643,161 @@ for word in test_words:
     else:
         print(f"  '{word}' ❌ Incorrect - Suggestions: {suggestions}")
 
+# Challenge 4: Text statistics analyzer
+def advanced_text_statistics(text):
+    """Advanced text statistics analysis"""
+    import re
+    from collections import Counter
+    
+    # Basic counts
+    char_count = len(text)
+    word_count = len(text.split())
+    sentence_count = len(re.findall(r'[.!?]+', text))
+    paragraph_count = len([p for p in text.split('\n\n') if p.strip()])
+    
+    # Word analysis
+    words = re.findall(r'\b[a-zA-Z]+\b', text.lower())
+    word_lengths = [len(word) for word in words]
+    avg_word_length = sum(word_lengths) / len(word_lengths) if word_lengths else 0
+    
+    # Most common words
+    word_freq = Counter(words)
+    most_common = word_freq.most_common(5)
+    
+    # Readability metrics (simplified)
+    avg_sentence_length = word_count / sentence_count if sentence_count else 0
+    
+    return {
+        'characters': char_count,
+        'words': word_count,
+        'sentences': sentence_count,
+        'paragraphs': paragraph_count,
+        'avg_word_length': avg_word_length,
+        'avg_sentence_length': avg_sentence_length,
+        'most_common_words': most_common,
+        'unique_words': len(set(words)),
+        'lexical_diversity': len(set(words)) / len(words) if words else 0
+    }
+
+print(f"\nChallenge 4 - Advanced Text Statistics:")
+analysis_text = """Python is a high-level programming language. It's known for its simplicity and readability. 
+Python supports multiple programming paradigms. Many developers love Python for web development, data science, and automation."""
+
+stats = advanced_text_statistics(analysis_text)
+print(f"Text analysis results:")
+for key, value in stats.items():
+    if key == 'most_common_words':
+        print(f"  {key.replace('_', ' ').title()}: {value}")
+    elif isinstance(value, float):
+        print(f"  {key.replace('_', ' ').title()}: {value:.2f}")
+    else:
+        print(f"  {key.replace('_', ' ').title()}: {value}")
+
+# Challenge 5: Simple template engine
+class SimpleTemplate:
+    """Simple template engine"""
+    
+    def __init__(self, template_string):
+        self.template = template_string
+    
+    def render(self, **kwargs):
+        """Render template with given variables"""
+        result = self.template
+        
+        # Replace variables
+        for key, value in kwargs.items():
+            placeholder = f"{{{key}}}"
+            result = result.replace(placeholder, str(value))
+        
+        return result
+    
+    def render_safe(self, **kwargs):
+        """Render template with error handling"""
+        result = self.template
+        missing_vars = []
+        
+        # Find all placeholders
+        import re
+        placeholders = re.findall(r'\{(\w+)\}', self.template)
+        
+        for placeholder in placeholders:
+            if placeholder in kwargs:
+                result = result.replace(f"{{{placeholder}}}", str(kwargs[placeholder]))
+            else:
+                missing_vars.append(placeholder)
+        
+        return result, missing_vars
+
+print(f"\nChallenge 5 - Simple Template Engine:")
+template = SimpleTemplate("Hello {name}, welcome to {place}! You are {age} years old.")
+
+# Test normal rendering
+rendered = template.render(name="Alice", place="Python World", age=25)
+print(f"Template: {template.template}")
+print(f"Rendered: {rendered}")
+
+# Test safe rendering with missing variables
+rendered_safe, missing = template.render_safe(name="Bob", age=30)
+print(f"\nSafe rendering (missing 'place'):")
+print(f"Rendered: {rendered_safe}")
+print(f"Missing variables: {missing}")
+
+# Advanced template with loops (simple)
+class AdvancedTemplate:
+    """Advanced template with basic loop support"""
+    
+    def __init__(self, template_string):
+        self.template = template_string
+    
+    def render(self, **kwargs):
+        """Render template with variable substitution and simple loops"""
+        import re
+        result = self.template
+        
+        # Handle simple loops: {for item in items}...{endfor}
+        loop_pattern = r'\{for (\w+) in (\w+)\}(.*?)\{endfor\}'
+        
+        def replace_loop(match):
+            var_name = match.group(1)
+            list_name = match.group(2)
+            loop_content = match.group(3)
+            
+            if list_name in kwargs and isinstance(kwargs[list_name], list):
+                loop_result = ""
+                for item in kwargs[list_name]:
+                    item_content = loop_content.replace(f"{{{var_name}}}", str(item))
+                    loop_result += item_content
+                return loop_result
+            return match.group(0)  # Return original if list not found
+        
+        result = re.sub(loop_pattern, replace_loop, result, flags=re.DOTALL)
+        
+        # Handle regular variables
+        for key, value in kwargs.items():
+            if not isinstance(value, list):  # Skip lists (handled by loops)
+                placeholder = f"{{{key}}}"
+                result = result.replace(placeholder, str(value))
+        
+        return result
+
+print(f"\nAdvanced Template with Loops:")
+advanced_template = AdvancedTemplate("""
+Hello {name}!
+Your favorite programming languages:
+{for lang in languages}
+- {lang}
+{endfor}
+""")
+
+rendered_advanced = advanced_template.render(
+    name="Charlie",
+    languages=["Python", "JavaScript", "Go"]
+)
+print(f"Advanced template result:")
+print(rendered_advanced)
+
 print("\n" + "=" * 70)
-print("🎉 Congratulations! You've completed the Python Strings Guide!")
+print("🎉 Congratulations! You've completed the Complete Python Strings Guide!")
 print("🏆 You now have comprehensive knowledge of string manipulation!")
 print("=" * 70)
 
@@ -1297,65 +1805,105 @@ print(f"""
 🎯 What You've Mastered:
 
 ✅ String creation and quote types
-✅ Character encoding and Unicode
+✅ Character encoding and Unicode handling
 ✅ Indexing and slicing techniques
 ✅ All essential string methods
-✅ String formatting (old and modern)
-✅ Concatenation performance
-✅ Validation and cleaning
+✅ Complete string formatting guide
+✅ Concatenation methods and performance
+✅ Validation and cleaning techniques
 ✅ Advanced string operations
-✅ Security considerations
-✅ Performance optimization
+✅ String interning and memory management
 ✅ Real-world applications
 ✅ String algorithms and patterns
+✅ Advanced text processing
+✅ Security considerations
 ✅ Best practices and debugging
+✅ Comprehensive practice exercises
 
 🚀 Next Steps:
-1. Practice with real text data
+1. Practice with real text data and APIs
 2. Build text processing applications
-3. Learn regular expressions
-4. Explore natural language processing
-5. Work with APIs that return text data
+3. Learn advanced regular expressions
+4. Explore natural language processing (NLTK, spaCy)
+5. Work with web scraping and text extraction
+6. Build chatbots and text analyzers
+7. Study internationalization and localization
+8. Explore machine learning with text data
 
-💡 Remember:
+💡 Key Takeaways:
 - Strings are immutable in Python
-- f-strings are the modern way to format
-- Always validate user input
+- f-strings are the modern standard for formatting
+- Always validate and sanitize user input
+- Use appropriate encoding/decoding
 - Performance matters with large text data
-- Unicode handling is important for global apps
+- Unicode handling is crucial for global applications
+- Choose the right algorithm for text processing tasks
+- Security should always be considered
 
-Keep practicing and building! 🐍✨
+🔧 Advanced Libraries to Explore:
+- regex: Advanced regular expressions
+- ftfy: Fix text encoding issues  
+- unidecode: ASCII transliterations
+- textdistance: Various string distance algorithms
+- fuzzywuzzy: Fuzzy string matching
+- nltk/spaCy: Natural language processing
+- beautifulsoup4: HTML/XML parsing
+- requests: HTTP requests and text processing
+
+Keep practicing and building amazing text applications! 🐍✨
 """)
 
 # Quick reference card
 print(f"""
-📋 Strings Quick Reference:
+📋 Strings Quick Reference Card:
 
 Creating:
 'text' or "text"          # Basic strings
 '''multiline'''           # Multiline strings
-f"Hello {name}"          # f-strings (best)
+f"Hello {name}"          # f-strings (recommended)
+r"C:\path\file"          # Raw strings
 
-Common Methods:
+Essential Methods:
 str.upper(), .lower()     # Case conversion
 str.strip()              # Remove whitespace
 str.split()              # Split to list
 str.join(list)           # Join list to string
 str.replace(old, new)    # Replace text
-str.find(sub)            # Find position
+str.find(sub)            # Find position (-1 if not found)
 str.startswith(prefix)   # Check start
 str.endswith(suffix)     # Check end
 
 Formatting:
-f"{{var}}"                # f-string (recommended)
+f"{{var}}"                # f-string (best practice)
 "{{}}".format(var)        # .format() method
-"%s" % var               # % formatting (old)
+"%s" % var               # % formatting (legacy)
 
-Safety:
-Always validate input
+Validation:
+str.isdigit()            # Check if all digits
+str.isalpha()            # Check if all letters
+str.isalnum()            # Check if alphanumeric
+str.isascii()            # Check if ASCII only
+
+Security:
+Always validate user input
+Sanitize HTML/script content
 Use parameterized queries
 Escape special characters
-Set length limits
+Set reasonable length limits
+
+Performance:
+Use f-strings for formatting
+Use join() for multiple concatenations
+Avoid += in loops for large strings
+Use StringIO for building very large strings
+Consider memory usage with large texts
+
+Unicode:
+text.encode('utf-8')     # String to bytes
+bytes.decode('utf-8')    # Bytes to string  
+unicodedata.normalize()  # Normalize Unicode
+ord(char)                # Character to Unicode point
+chr(num)                 # Unicode point to character
 """)
 
 # End of comprehensive string guide
